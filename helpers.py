@@ -9,7 +9,7 @@ def user_markdown(message):
 def assistant_markdown(message):
     div = '<div class="chat-row">'
 #    div += '<img class="chat-icon" src="./app/static/ai_icon1.png" width=40 height=40>'
-    div += '<img class="chat-icon" src="./app/static/bot3.png" width=40 height=40>'
+    div += '<img class="chat-icon" src="./static/bot3.png" width=40 height=40>'
     div += '<div class="chat-bubble ai-bubble">'+message+' </div>  </div>'
     return div
 
