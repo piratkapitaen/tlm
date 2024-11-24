@@ -81,11 +81,11 @@ value = st.sidebar.number_input("value")
 ##threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=25.0, value=2.0, step=0.1)
 ##adj = st.sidebar.slider('temp adjust', min_value=-7, max_value=8, value=0, step=1)
 
+st.image('static/bot3.png', width=64)
 txt = '<div class="chat-row">'
 #    div += '<img class="chat-icon" src="./app/static/ai_icon1.png" width=40 height=40>'
-txt += '<img class="chat-icon" src="bot3.png" width=40 height=40>'
 txt += '<div class="chat-bubble ai-bubble">'+'Hello, please make your inputs and generate.\n'+' </div>  </div>'
-    
+  
 st.markdown(txt, unsafe_allow_html=True)
 add_vertical_space(1)
 st.text_area('PWL:', value=st.session_state.text, height=170)
