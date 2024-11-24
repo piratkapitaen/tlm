@@ -77,7 +77,7 @@ mode = st.sidebar.radio(
     "unlock:",
     ["yes", "no"])
 addr = st.sidebar.number_input("register", min_value=0, max_value=255, value=12, step=1)
-value = st.sidebar.number_input("value")
+value = st.sidebar.number_input("value", min_value=0, max_value=255, value=0, step=1)
 ##threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=25.0, value=2.0, step=0.1)
 ##adj = st.sidebar.slider('temp adjust', min_value=-7, max_value=8, value=0, step=1)
 
