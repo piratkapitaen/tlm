@@ -69,9 +69,9 @@ with st.sidebar:
 
 st.sidebar.button('Generate', on_click=generate_memory)
 
-exit_app = st.sidebar.button("Exit App")
-if exit_app:
-    time.sleep(.3); pid = os.getpid(); p = psutil.Process(pid);  p.terminate();
+#exit_app = st.sidebar.button("Exit App")
+#if exit_app:
+#    time.sleep(.3); pid = os.getpid(); p = psutil.Process(pid);  p.terminate();
 
 mode = st.sidebar.radio(
     "unlock:",
