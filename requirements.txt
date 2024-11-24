@@ -1,4 +1,3 @@
+streamlit==1.34.0
 streamlit_extras
-streamlit
-matplotlib
-matplotlib.pyplot
+matplotlib==3.9.0
