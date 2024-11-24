@@ -83,7 +83,7 @@ value = st.sidebar.number_input("value")
 
 txt = '<div class="chat-row">'
 #    div += '<img class="chat-icon" src="./app/static/ai_icon1.png" width=40 height=40>'
-txt += '<img class="chat-icon" src="./app/static/bot3.png" width=40 height=40>'
+txt += '<img class="chat-icon" src="bot3.png" width=40 height=40>'
 txt += '<div class="chat-bubble ai-bubble">'+'Hello, please make your inputs and generate.\n'+' </div>  </div>'
     
 st.markdown(txt, unsafe_allow_html=True)
