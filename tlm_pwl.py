@@ -5,6 +5,93 @@ import matplotlib.pyplot as plt
 from helpers import *
 import os, time, random, datetime, re, gzip, pickle, time, psutil
 
+TD    = 1
+VLO   = 0
+VMID  = 2.25
+VHI   = 4.5
+EPS   = 0.001
+SCAL  = 2.
+DELAY = 20
+MODE  = 1  # 0: old 1bit mode, 1: TLM mode
+UNLOCK = ['S', 0, 0, 0, 'W', 24, 71, 4, 'W', 25, 230, 4]
+
+def func_delay():
+    return [TD, VMID]
+
+def pulse(td, v1, v2):
+    if MODE==1:
+        l = [(td*.25), VMID, EPS, v1, (td*.25)-EPS-EPS, v1, EPS, VMID,\
+             (td*.25)-EPS, VMID, EPS, v2, (td*.25)-EPS, v2, EPS, VMID]
+    else:
+        l = [(td*.333), VMID, EPS, v1, (td*.333)-EPS, v1,\
+             EPS, VMID, (td*.333), VMID]        
+    return l
+
+def flatten_list(l, unit):
+    result = []; raw = []; ttime = 0.; result.append(str(ttime)+unit);
+    result.append(str(VMID)); result.append('\n');
+    raw.append(ttime); raw.append(VMID)
+    result.append(str(DELAY)+unit);result.append(str(VMID)); result.append('\n');
+    raw.append(DELAY); raw.append(VMID)
+    ttime += DELAY
+    for i in range(0, len(l), 2):
+        ttime += SCAL*l[i]; result.append(str(round(ttime, 3))+unit);
+        result.append(str(l[i+1])); result.append('\n');
+        raw.append(round(ttime, 3)); raw.append(l[i+1])
+    return ' '.join(map(str, result)), raw
+
+def split_list(l):
+    pass
+
+def combine(l):
+    new_list = []
+    for item in l:
+        if item==0:
+            new_list += pulse(TD, VLO, VHI)
+        elif item==1:
+            new_list += pulse(TD, VHI, VLO)
+        else:
+            new_list += func_delay()
+    return new_list
+
+def cmd2bits6adr8dat(lst):
+    pass
+
+def sync():
+    return [0]*18
+
+def adr2bin(adr):
+    adr = 127 - adr; a = bin(adr)[2:]; a = '0'*(7-len(a)) + a;
+    return [int(digit) for digit in a]
+
+def data2bin(data):
+    data = 255 - data; a = bin(data)[2:]; a = '0'*(8-len(a)) + a;
+    return [int(digit) for digit in a]
+
+def cmd7adr8dat(lst):
+    new_list = []
+    for i in range(0, len(lst), 4):
+        rw    = lst[i]; adr   = lst[i+1]; data  = lst[i+2]; pause = lst[i+3];
+        startbit = [0]
+        if rw == 'W':
+            l = startbit + adr2bin(adr) + [0] + data2bin(data) + [-1]*pause
+        elif rw == 'A':
+            l = [1]*18 + [-1]*pause
+        elif rw == 'S':
+            l = [-2]
+        else:
+            l = startbit + adr2bin(adr) + [1] + data2bin(data) + [-1]*pause
+        for item in l:
+            if item==0:
+                new_list += pulse(TD, VLO, VHI)
+            elif item==1:
+                new_list += pulse(TD, VHI, VLO)
+            elif item==-2:
+                new_list += pulse(TD, VLO, VLO)
+            else:
+                new_list += func_delay()
+    return new_list
+    
 # CSS für weniger Abstand nach oben
 ##st.markdown("""
 ##    <style>
@@ -42,7 +129,19 @@ def load_pickle_gzip(filename):
         return pickle.load(file)
 
 def generate_memory():
-##    print('Hallo')
+    # calculate and redraw diagram
+    if mode == "yes":  
+        a = cmd7adr8dat(UNLOCK + ['W', 65, 21, 4]) # unlock pattern + Adr 8: 85
+        print('UNLOCK')
+    else:
+        a = cmd7adr8dat(['W', 65, 21, 4]) # no unlock 
+        print('NO UNLOCK')
+    b, raw = flatten_list(a, 'u')
+    time_values = [raw[i] for i in range(len(raw)) if i % 2 == 0]
+    voltage_values = [raw[i] for i in range(len(raw)) if i % 2 != 0]
+    plot_piecewise_function(time_values, voltage_values)
+
+    ##    print('Hallo')
 ##    st.session_state.text = 'Abcdef'
     # 12 Zeilen mit 4 Hexadezimalzahlen pro Zeile
     hex_table = [
@@ -50,7 +149,7 @@ def generate_memory():
         for _ in range(3)
     ]
     # Verbinden der Zeilen mit Zeilenumbrüchen
-    st.session_state.text = "\n".join(hex_table)    
+    st.session_state.text = "\n".join(hex_table)
 
 # Funktion zum Plotten einer piecewise linearen Funktion
 def plot_piecewise_function(x_values, y_values):
