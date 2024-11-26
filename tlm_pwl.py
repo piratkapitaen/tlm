@@ -151,6 +151,8 @@ def generate_memory():
     # Verbinden der Zeilen mit Zeilenumbrüchen
     st.session_state.text = "\n".join(hex_table)
 
+plot_placeholder = st.empty()
+
 # Funktion zum Plotten einer piecewise linearen Funktion
 def plot_piecewise_function(x_values, y_values):
     fig, ax = plt.subplots(figsize=(6, 2.1))
@@ -193,7 +195,9 @@ st.text_area('PWL:', value=st.session_state.text, height=170)
 x_values = [0, 100]
 y_values = [0, 0]
 
-# Plot der Funktion über der Textbox
-plot_piecewise_function(x_values, y_values)
+if "initialized" not in st.session_state:
+    # Plot der Funktion über der Textbox
+    plot_piecewise_function(x_values, y_values)
+    st.session_state.initialized = False
 
 
