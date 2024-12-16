@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 from helpers import *
 import os, time, random, datetime, re, gzip, pickle, time, psutil
 
-TD    = 1
+TD    = 0.5
 VLO   = 0
-VMID  = 2.25
-VHI   = 4.5
+VMID  = 1.9
+VHI   = 4.0
 EPS   = 0.001
-SCAL  = 2.
+SCAL  = 1.
 DELAY = 20
 MODE  = 0  # 0: old 1bit mode, 1: TLM mode
 UNLOCK = ['S', 0, 0, 0, 'W', 24, 71, 4, 'W', 25, 230, 4]
@@ -28,15 +28,18 @@ def pulse(td, v1, v2):
     return l
 
 def flatten_list(l, unit):
+    DELAY = user_delay
+    separator = '\n'
+    separator = ''
     result = []; raw = []; ttime = 0.; result.append(str(ttime)+unit);
-    result.append(str(VMID)); result.append('\n');
+    result.append(str(VMID)); result.append(separator);
     raw.append(ttime); raw.append(VMID)
-    result.append(str(DELAY)+unit);result.append(str(VMID)); result.append('\n');
+    result.append(str(DELAY)+unit);result.append(str(VMID)); result.append(separator);
     raw.append(DELAY); raw.append(VMID)
     ttime += DELAY
     for i in range(0, len(l), 2):
         ttime += SCAL*l[i]; result.append(str(round(ttime, 3))+unit);
-        result.append(str(l[i+1])); result.append('\n');
+        result.append(str(l[i+1])); result.append(separator);
         raw.append(round(ttime, 3)); raw.append(l[i+1])
     return ' '.join(map(str, result)), raw
 
@@ -124,21 +127,33 @@ st.markdown("""
 if 'text' not in st.session_state:
     st.session_state.text = ""
 
-def load_pickle_gzip(filename):
-    with gzip.open(filename, 'rb') as file:
-        return pickle.load(file)
-
 def generate_memory():
+    # Parsing the input
+    try:
+        numbers = [int(num) for num in user_input.split()]
+        # Ergebnisliste initialisieren
+        result_list = []
+        # Paarweise Verarbeitung der Zahlen
+        for i in range(0, len(numbers) - 1, 2):  # Schrittweise Iteration (2 Elemente pro Schritt)
+            address = numbers[i]    # Adresse
+            data = numbers[i + 1]   # Data
+            result_list += ['W', address, data, 3]  # Liste erweitern
+#        st.write(result_list)
+    except ValueError:
+        st.error("Invalid input! Please enter only numbers separated by spaces.")
+    
     # calculate and redraw diagram
-    if mode == "yes":  
-        a = cmd7adr8dat(UNLOCK + ['W', 65, 21, 4]) # unlock pattern + Adr 8: 85
+    if unlock == "yes":
+        a = cmd7adr8dat(UNLOCK + result_list) # unlock pattern + Adr 8: 85
         print('UNLOCK')
     else:
-        a = cmd7adr8dat(['W', 65, 21, 4]) # no unlock 
+        a = cmd7adr8dat(result_list) # no unlock 
         print('NO UNLOCK')
     b, raw = flatten_list(a, 'u')
+#    st.write(b)
     time_values = [raw[i] for i in range(len(raw)) if i % 2 == 0]
     voltage_values = [raw[i] for i in range(len(raw)) if i % 2 != 0]
+    
     plot_piecewise_function(time_values, voltage_values)
 
     ##    print('Hallo')
@@ -149,7 +164,8 @@ def generate_memory():
         for _ in range(3)
     ]
     # Verbinden der Zeilen mit Zeilenumbrüchen
-    st.session_state.text = "\n".join(hex_table)
+#    st.session_state.text = "\n".join(hex_table)
+    st.session_state.text = b
 
 plot_placeholder = st.empty()
 
@@ -174,11 +190,11 @@ st.sidebar.button('Generate', on_click=generate_memory)
 #if exit_app:
 #    time.sleep(.3); pid = os.getpid(); p = psutil.Process(pid);  p.terminate();
 
-mode = st.sidebar.radio(
+unlock = st.sidebar.radio(
     "unlock:",
     ["yes", "no"])
-addr = st.sidebar.number_input("register", min_value=0, max_value=255, value=12, step=1)
-value = st.sidebar.number_input("value", min_value=0, max_value=255, value=0, step=1)
+user_input = st.sidebar.text_input("Address Data pairs:")
+user_delay = st.sidebar.number_input("Delay [us]", min_value=10, max_value=1000, value=20, step=1)
 ##threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=25.0, value=2.0, step=0.1)
 ##adj = st.sidebar.slider('temp adjust', min_value=-7, max_value=8, value=0, step=1)
 
@@ -186,10 +202,10 @@ st.image('static/bot3.png', width=64)
 txt = '<div class="chat-row">'
 #    div += '<img class="chat-icon" src="./app/static/ai_icon1.png" width=40 height=40>'
 txt += '<div class="chat-bubble ai-bubble">'+'Hello, please make your inputs and generate.\n'+' </div>  </div>'
-  
+    
 st.markdown(txt, unsafe_allow_html=True)
 add_vertical_space(1)
-st.text_area('PWL:', value=st.session_state.text, height=170)
+st.text_area('PWL:', value=st.session_state.text, height=450)
 
 # Beispielwerte für die piecewise lineare Funktion
 x_values = [0, 100]
@@ -199,5 +215,4 @@ if "initialized" not in st.session_state:
     # Plot der Funktion über der Textbox
     plot_piecewise_function(x_values, y_values)
     st.session_state.initialized = False
-
 
