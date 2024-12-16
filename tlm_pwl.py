@@ -12,7 +12,7 @@ VHI   = 4.5
 EPS   = 0.001
 SCAL  = 2.
 DELAY = 20
-MODE  = 1  # 0: old 1bit mode, 1: TLM mode
+MODE  = 0  # 0: old 1bit mode, 1: TLM mode
 UNLOCK = ['S', 0, 0, 0, 'W', 24, 71, 4, 'W', 25, 230, 4]
 
 def func_delay():
