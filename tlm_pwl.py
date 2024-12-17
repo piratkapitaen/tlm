@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from helpers import *
 import os, time, random, datetime, re, gzip, pickle, time, psutil
 
-TD    = 0.5
+TD    = 1
 VLO   = 0
 VMID  = 1.9
 VHI   = 4.0
@@ -143,7 +143,8 @@ def generate_memory():
         st.error("Invalid input! Please enter only numbers separated by spaces.")
     
     # calculate and redraw diagram
-    if unlock == "yes":
+    print(unlock)
+    if unlock.startswith("yes"):
         a = cmd7adr8dat(UNLOCK + result_list) # unlock pattern + Adr 8: 85
         print('UNLOCK')
     else:
