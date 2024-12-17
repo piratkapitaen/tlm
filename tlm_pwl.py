@@ -143,13 +143,13 @@ def generate_memory():
         st.error("Invalid input! Please enter only numbers separated by spaces.")
     
     # calculate and redraw diagram
-    print(unlock)
+#    print(unlock)
     if unlock.startswith("yes"):
         a = cmd7adr8dat(UNLOCK + result_list) # unlock pattern + Adr 8: 85
-        print('UNLOCK')
+#        print('UNLOCK')
     else:
         a = cmd7adr8dat(result_list) # no unlock 
-        print('NO UNLOCK')
+#        print('NO UNLOCK')
     b, raw = flatten_list(a, 'u')
 #    st.write(b)
     time_values = [raw[i] for i in range(len(raw)) if i % 2 == 0]
