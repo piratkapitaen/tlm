@@ -9,11 +9,11 @@ TD    = 0.5
 VLO   = 0
 VMID  = 1.9
 VHI   = 4.0
-EPS   = 0.001
+EPS   = 0.010
 SCAL  = 1.
 DELAY = 20
 MODE  = 0  # 0: old 1bit mode, 1: TLM mode
-UNLOCK = ['S', 0, 0, 0, 'W', 24, 71, 4, 'W', 25, 230, 4]
+UNLOCK = ['S', 8, 0, 0, 'W', 24, 71, 3, 'W', 25, 230, 3]
 
 def func_delay():
     return [TD, VMID]
@@ -90,7 +90,7 @@ def cmd7adr8dat(lst):
             elif item==1:
                 new_list += pulse(TD, VHI, VLO)
             elif item==-2:
-                new_list += pulse(TD, VLO, VLO)
+                new_list += pulse(TD, VHI, VHI)
             else:
                 new_list += func_delay()
     return new_list
