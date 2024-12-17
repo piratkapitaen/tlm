@@ -159,13 +159,6 @@ def generate_memory():
 
     ##    print('Hallo')
 ##    st.session_state.text = 'Abcdef'
-    # 12 Zeilen mit 4 Hexadezimalzahlen pro Zeile
-    hex_table = [
-        "\t".join(f"{random.randint(0, 255):02X}" for _ in range(4))
-        for _ in range(3)
-    ]
-    # Verbinden der Zeilen mit Zeilenumbrüchen
-#    st.session_state.text = "\n".join(hex_table)
     st.session_state.text = b
 
 plot_placeholder = st.empty()
@@ -187,13 +180,16 @@ with st.sidebar:
 
 st.sidebar.button('Generate', on_click=generate_memory)
 
-#exit_app = st.sidebar.button("Exit App")
-#if exit_app:
-#    time.sleep(.3); pid = os.getpid(); p = psutil.Process(pid);  p.terminate();
+exit_app = st.sidebar.button("Exit App")
+if exit_app:
+    time.sleep(.3); pid = os.getpid(); p = psutil.Process(pid);  p.terminate();
 
 unlock = st.sidebar.radio(
     "unlock:",
     ["yes", "no"])
+protocol = st.sidebar.radio(
+    "protocol:",
+    ["Legacy", "TLM"])
 user_input = st.sidebar.text_input("Address Data pairs:")
 user_delay = st.sidebar.number_input("Delay [us]", min_value=10, max_value=1000, value=20, step=1)
 ##threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=25.0, value=2.0, step=0.1)
