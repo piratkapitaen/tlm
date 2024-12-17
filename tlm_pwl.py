@@ -81,7 +81,7 @@ def cmd7adr8dat(lst):
         elif rw == 'A':
             l = [1]*18 + [-1]*pause
         elif rw == 'S':
-            l = [-2]
+            l = [-2]*adr
         else:
             l = startbit + adr2bin(adr) + [1] + data2bin(data) + [-1]*pause
         for item in l:
