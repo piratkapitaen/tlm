@@ -6,3 +6,7 @@ yfinance==0.2.50
 pandas==2.1.4
 altair==5.5.0
 alpha_vantage==3.0.0
+replicate==0.22.0
+together==0.2.10
+langchain==0.0.350
+
