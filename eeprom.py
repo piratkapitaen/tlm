@@ -4,6 +4,9 @@ import streamlit.components.v1 as components
 from helpers import *
 import os, time, random, psutil, datetime, pickle, time
 
+# App title
+st.set_page_config(page_title="EEPROM config", layout="wide")
+
 # CSS für weniger Abstand nach oben
 ##st.markdown("""
 ##    <style>
@@ -15,9 +18,6 @@ import os, time, random, psutil, datetime, pickle, time
 ##    }
 ##    </style>
 ##    """, unsafe_allow_html=True)
-
-# App title
-st.set_page_config(page_title="EEPROM config", layout="wide")
 
 st.markdown("""
     <style>
@@ -36,26 +36,69 @@ st.markdown("""
 if 'text' not in st.session_state:
     st.session_state.text = ""
 
-def load_pickle_gzip(filename):
-    with gzip.open(filename, 'rb') as file:
-        return pickle.load(file)
-
 def generate_memory():
-##    print('Hallo')
-##    st.session_state.text = 'Abcdef'
+    memory = []
     # 12 Zeilen mit 4 Hexadezimalzahlen pro Zeile
-    hex_table = [
-        "\t".join(f"{random.randint(0, 255):02X}" for _ in range(4))
-        for _ in range(3)
-    ]
+    print('Werte: ', int(bw), float(threshold), str(mode) ) # threshold*10 in 0.1mT
+    bon = int(10 * float(threshold))
+    bandwidth = int(bw)
+    res = 0
+    if mode=='speed/speed':
+        if axis=='XY':
+            res = res | 12
+        elif axis=='ZX':
+            res = res | 16
+        elif axis=='ZY':
+            res = res | 20
+    elif mode=='speed/direction':
+        if axis=='XY':
+            pass
+        elif axis=='ZX':
+            res = res | 4
+        elif axis=='ZY':
+            res = res | 8
+    if fusi=='disabled':
+        res = res | 1
+    memory.append(res)
+    res = 0
+    if poweron=='low':
+        res = 128
+    # TC = 0ppm/K
+    if int(bw)==5:
+        res = res | 12
+    elif int(bw)==10:
+        res = res | 4
+    elif int(bw)==20:
+        res = res | 8
+    memory.append(res)
+    res = 0
+    # X-TC and Y-TC offset 
+    memory.append(0)
+    memory.append(0)
+    memory.append(bon)
+    memory.append(256 - bon) #  Two's complement
+    memory.append(bon)
+    memory.append(256 - bon) #  Two's complement
+    #  MIC ID === 0
+    memory.append(0)
+    memory.append(0)
+    memory.append(0)
+    memory.append(0)
+
+    my_str = ""
+    for byte in memory:
+        my_str += str(byte)+' '
+    mem = bytearray(memory)
+
+    hex_string = mem.hex()
     # Verbinden der Zeilen mit Zeilenumbrüchen
-    st.session_state.text = "\n".join(hex_table)    
+    st.session_state.text = my_str + '\n' + hex_string    
 
 # Sidebar
 with st.sidebar:
-    st.title("EEPROM")    
+#    st.title("EEPROM")    
     st.markdown('''
-    Config generator  
+    EEPROM Config generator  
     ''', unsafe_allow_html=True)
     st.image('static/ic_icon.png', width=200)
 
@@ -65,11 +108,23 @@ st.sidebar.button('Generate', on_click=generate_memory)
 ##if exit_app:
 ##    time.sleep(.3); pid = os.getpid(); p = psutil.Process(pid);  p.terminate();
 
-mode = st.sidebar.radio(
-    "bandwidth:",
-    ["5kHz", "10kHz", "20kHz"])
+bw = st.sidebar.radio(
+    "bandwidth [kHz]:",
+    ["5", "10", "20"])
 threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=25.0, value=2.0, step=0.1)
-adj = st.sidebar.slider('temp adjust', min_value=-7, max_value=8, value=0, step=1)
+#adj = st.sidebar.slider('temp adjust', min_value=-7, max_value=8, value=0, step=1)
+mode = st.sidebar.radio(
+    "mode:",
+    ["speed/speed", "speed/direction"])
+axis = st.sidebar.radio(
+    "axis:",
+    ["XY", "ZX", "ZY"])
+fusi = st.sidebar.radio(
+    "fusi:",
+    ["enabled", "disabled"])
+poweron = st.sidebar.radio(
+    "power on state:",
+    ["high-Z", "low"])
 
 st.image('static/bot3.png', width=64)
 txt = '<div class="chat-row">'
