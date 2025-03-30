@@ -4,9 +4,6 @@ import streamlit.components.v1 as components
 from helpers import *
 import os, time, random, psutil, datetime, pickle, time
 
-# App title
-st.set_page_config(page_title="EEPROM config", layout="wide")
-
 # CSS für weniger Abstand nach oben
 ##st.markdown("""
 ##    <style>
@@ -18,6 +15,9 @@ st.set_page_config(page_title="EEPROM config", layout="wide")
 ##    }
 ##    </style>
 ##    """, unsafe_allow_html=True)
+
+# App title
+st.set_page_config(page_title="EEPROM config", layout="wide")
 
 st.markdown("""
     <style>
@@ -65,16 +65,16 @@ def generate_memory():
         res = 128
     # TC = 0ppm/K
     if int(bw)==5:
-        res = res | 12
+        res = res | 24
     elif int(bw)==10:
-        res = res | 4
+        res = res | 16
     elif int(bw)==20:
         res = res | 8
     memory.append(res)
     res = 0
     # X-TC and Y-TC offset 
     memory.append(0)
-    memory.append(0)
+#    memory.append(0)
     memory.append(bon)
     memory.append(256 - bon) #  Two's complement
     memory.append(bon)
@@ -84,15 +84,18 @@ def generate_memory():
     memory.append(0)
     memory.append(0)
     memory.append(0)
+    memory.append(0)
+
+    parity = sum(memory[:-4]) % 2
 
     my_str = ""
     for byte in memory:
-        my_str += str(byte)+' '
+        my_str += str(byte)+' \n'
     mem = bytearray(memory)
 
     hex_string = mem.hex()
     # Verbinden der Zeilen mit Zeilenumbrüchen
-    st.session_state.text = my_str + '\n' + hex_string    
+    st.session_state.text = my_str + '\n' + hex_string + '\n\n' + 'Parity: ' + str(parity)
 
 # Sidebar
 with st.sidebar:
