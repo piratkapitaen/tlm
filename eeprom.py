@@ -36,6 +36,14 @@ st.markdown("""
 if 'text' not in st.session_state:
     st.session_state.text = ""
 
+def calc_parity(byte_list):
+    parity = 0
+    for byte in byte_list:
+        while byte:
+            parity ^= (byte & 1) # XOR mit LSB
+            byte >>= 1
+    return parity
+
 def generate_memory():
     memory = []
     # 12 Zeilen mit 4 Hexadezimalzahlen pro Zeile
@@ -86,7 +94,17 @@ def generate_memory():
     memory.append(0)
     memory.append(0)
 
-    parity = sum(memory[:-4]) % 2
+    memory_masked = []
+
+    # iterate over EEPROM #0 - #7
+    for mm, bitmask in zip(memory[:-4], [239, 254, 255, 11, 255, 255, 255, 255]):
+        memory_masked.append(mm & bitmask)
+
+    # calculate parity
+    parity = calc_parity(memory_masked)
+    # correct parity in memory
+    memory[1] = memory[1] | parity
+
 
     my_str = ""
     for byte in memory:
@@ -95,7 +113,7 @@ def generate_memory():
 
     hex_string = mem.hex()
     # Verbinden der Zeilen mit Zeilenumbrüchen
-    st.session_state.text = my_str + '\n' + hex_string + '\n\n' + 'Parity: ' + str(parity)
+    st.session_state.text = 'EEPROM bytes:\n\n' + my_str + '\nHEX String:\n\n' + hex_string + '\n\n' + 'Parity: ' + str(parity)
 
 # Sidebar
 with st.sidebar:
