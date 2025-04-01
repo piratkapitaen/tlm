@@ -87,12 +87,17 @@ def generate_memory():
     memory.append(256 - bon) #  Two's complement
     memory.append(bon)
     memory.append(256 - bon) #  Two's complement
-    #  MIC ID === 0
     memory.append(0)
-    memory.append(0)
-    memory.append(0)
-    memory.append(0)
-    memory.append(0)
+    if UID=='0x00000000':
+        memory.append(0)
+        memory.append(0)
+        memory.append(0)
+        memory.append(0)
+    else:
+        memory.append(85)
+        memory.append(170)
+        memory.append(85)
+        memory.append(170)
 
     memory_masked = []
 
@@ -107,13 +112,16 @@ def generate_memory():
 
 
     my_str = ""
+    arr = '['
     for byte in memory:
         my_str += str(byte)+' \n'
+        arr += str(byte) + ' '
     mem = bytearray(memory)
+    arr += ']\n'
 
     hex_string = mem.hex()
     # Verbinden der Zeilen mit Zeilenumbrüchen
-    st.session_state.text = 'EEPROM bytes:\n\n' + my_str + '\nHEX String:\n\n' + hex_string + '\n\n' + 'Parity: ' + str(parity)
+    st.session_state.text = 'EEPROM bytes:   '+arr+'\n' + my_str + '\nHEX String:    ' + hex_string + '\n' + 'Parity: ' + str(parity)
 
 # Sidebar
 with st.sidebar:
@@ -121,7 +129,7 @@ with st.sidebar:
     st.markdown('''
     EEPROM Config generator  
     ''', unsafe_allow_html=True)
-    st.image('static/ic_icon.png', width=200)
+    st.image('static/ic_icon.png', width=100)
 
 st.sidebar.button('Generate', on_click=generate_memory)
 
@@ -146,15 +154,18 @@ fusi = st.sidebar.radio(
 poweron = st.sidebar.radio(
     "power on state:",
     ["high-Z", "low"])
+UID = st.sidebar.radio(
+    "UID:",
+    ["0x00000000", "ckeckerboard: 0x55AA55AA"])
 
-st.image('static/bot3.png', width=64)
+st.image('static/evm.png', width=64)
 txt = '<div class="chat-row">'
 #    div += '<img class="chat-icon" src="./app/static/ai_icon1.png" width=40 height=40>'
 txt += '<div class="chat-bubble ai-bubble">'+'Hello, please make your inputs and generate.\n'+' </div>  </div>'
   
 st.markdown(txt, unsafe_allow_html=True)
 add_vertical_space(1)
-st.text_area('EEPROM contents:', value=st.session_state.text, height=260)
+st.text_area('EEPROM contents:', value=st.session_state.text, height=410)
 
 
 
