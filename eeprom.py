@@ -51,43 +51,38 @@ def generate_memory():
     bon = int(10 * float(threshold))
     bandwidth = int(bw)
     res = 0
-    if mode=='speed/speed':
-        if axis=='XY':
-            res = res | 12
-        elif axis=='ZX':
-            res = res | 16
-        elif axis=='ZY':
-            res = res | 20
-    elif mode=='speed/direction':
-        if axis=='XY':
-            pass
-        elif axis=='ZX':
-            res = res | 4
-        elif axis=='ZY':
-            res = res | 8
-    if fusi=='disabled':
+    if axis=='XY':
+        pass
+    elif axis=='ZX':
         res = res | 1
-    memory.append(res)
-    res = 0
-    if poweron=='low':
-        res = 128
+    elif axis=='ZY':
+        res = res | 2
+    memory.append(res);     res = 0;
+
+    if mode=='speed/speed':
+        res = 0
+    else:
+        res = res | 8
     # TC = 0ppm/K
     if int(bw)==5:
-        res = res | 24
+        res = res | 6
     elif int(bw)==10:
-        res = res | 16
+        res = res | 4
     elif int(bw)==20:
-        res = res | 8
-    memory.append(res)
-    res = 0
-    # X-TC and Y-TC offset 
-    memory.append(0)
-#    memory.append(0)
-    memory.append(bon)
+        res = res | 2
+    memory.append(res);     res = 0;
+    memory.append(0);       res = 0;
+
+    if fusi!='disabled':
+        res = res | 2
+    if poweron=='low':
+        res = 1
+    memory.append(res);     res = 0;
+    
     memory.append(256 - bon) #  Two's complement
     memory.append(bon)
     memory.append(256 - bon) #  Two's complement
-    memory.append(0)
+    memory.append(bon)
     if UID=='0x00000000':
         memory.append(0)
         memory.append(0)
@@ -140,7 +135,7 @@ st.sidebar.button('Generate', on_click=generate_memory)
 bw = st.sidebar.radio(
     "bandwidth [kHz]:",
     ["5", "10", "20"])
-threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=25.0, value=2.0, step=0.1)
+threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=15.0, value=2.0, step=0.1)
 #adj = st.sidebar.slider('temp adjust', min_value=-7, max_value=8, value=0, step=1)
 mode = st.sidebar.radio(
     "mode:",
