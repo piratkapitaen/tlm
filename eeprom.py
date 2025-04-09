@@ -30,6 +30,9 @@ st.markdown("""
     .css-1d391kg {  
         padding-top: 0rem;
     }
+    .css-znku1x.e16nr0p33 {
+      margin-top: -75px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -60,9 +63,9 @@ def generate_memory():
     memory.append(res);     res = 0;
 
     if mode=='speed/speed':
-        res = 0
-    else:
         res = res | 8
+    else:
+        res = 0
     # TC = 0ppm/K
     if int(bw)==5:
         res = res | 6
@@ -70,6 +73,8 @@ def generate_memory():
         res = res | 4
     elif int(bw)==20:
         res = res | 2
+    elif int(bw)==40:
+        res = res | 0
     memory.append(res);     res = 0;
     memory.append(0);       res = 0;
 
@@ -134,7 +139,7 @@ st.sidebar.button('Generate', on_click=generate_memory)
 
 bw = st.sidebar.radio(
     "bandwidth [kHz]:",
-    ["5", "10", "20"])
+    ["5", "10", "20", "40"])
 threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=15.0, value=2.0, step=0.1)
 #adj = st.sidebar.slider('temp adjust', min_value=-7, max_value=8, value=0, step=1)
 mode = st.sidebar.radio(
