@@ -140,7 +140,7 @@ st.sidebar.button('Generate', on_click=generate_memory)
 bw = st.sidebar.radio(
     "bandwidth [kHz]:",
     ["5", "10", "20", "40"])
-threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=15.0, value=2.0, step=0.1)
+threshold = st.sidebar.slider('threshold', min_value=0.5, max_value=12.5, value=2.0, step=0.1)
 #adj = st.sidebar.slider('temp adjust', min_value=-7, max_value=8, value=0, step=1)
 mode = st.sidebar.radio(
     "mode:",
