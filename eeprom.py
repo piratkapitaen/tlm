@@ -114,7 +114,7 @@ def generate_memory():
     my_str = ""
     arr = '['
     for byte in memory:
-        my_str += str(byte)+' \n'
+        my_str += str(byte)+ '     0b'+format(byte, '08b')+' \n'
         arr += str(byte) + ' '
     mem = bytearray(memory)
     arr += ']\n'
