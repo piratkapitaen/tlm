@@ -80,8 +80,8 @@ def generate_memory():
 
     if fusi!='disabled':
         res = res | 2
-    if poweron=='low':
-        res = 1
+    if poweron!='low':
+        res = res | 1
     memory.append(res);     res = 0;
     
     memory.append(256 - bon) #  Two's complement
