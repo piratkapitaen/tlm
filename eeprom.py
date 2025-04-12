@@ -3,6 +3,8 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 import streamlit.components.v1 as components
 from helpers import *
 import os, time, random, psutil, datetime, pickle, time
+import numpy as np
+import matplotlib.pyplot as plt
 
 # CSS für weniger Abstand nach oben
 ##st.markdown("""
@@ -26,6 +28,12 @@ st.markdown("""
         padding-top: 0rem;
         padding-bottom: 0rem;
     }
+    .main {
+        padding-top: 0rem !important;
+    }
+        header {
+            visibility: hidden;
+        }    
     /* Entferne Abstand oben von Hauptcontainer */
     .css-1d391kg {  
         padding-top: 0rem;
@@ -33,11 +41,25 @@ st.markdown("""
     .css-znku1x.e16nr0p33 {
       margin-top: -75px;
     }
+        /* Sidebar-Inhalt ganz oben platzieren */
+        section[data-testid="stSidebar"] > div:first-child {
+            padding-top: 0rem;
+        }    
     </style>
     """, unsafe_allow_html=True)
 
 if 'text' not in st.session_state:
     st.session_state.text = ""
+
+# Zeitachse & Signale
+x = np.linspace(0, 4 * np.pi, 1000)
+y_sin = 25.*np.sin(x)
+y_cos = 25.*np.cos(x)
+
+# Plot
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+fig.tight_layout()
+st.session_state['fig'] = fig  # Diagramm merken
 
 def calc_parity(byte_list):
     parity = 0
@@ -47,7 +69,23 @@ def calc_parity(byte_list):
             byte >>= 1
     return parity
 
+# Hysterese-Funktion
+def hysterese(signal, thresh_high, thresh_low):
+    output = np.zeros_like(signal)
+    state = 0
+    for i, val in enumerate(signal):
+        if state == 0 and val > thresh_high:
+            state = 10
+        elif state == 10 and val < thresh_low:
+            state = 0
+        output[i] = state
+    return output
+
 def generate_memory():
+    # Hysterese anwenden
+    y_sin_hyst = hysterese(y_sin, int(1. * float(threshold)), -1.*int(1. * float(threshold)))
+    y_cos_hyst = hysterese(y_cos, int(1. * float(threshold)), -1.*int(1. * float(threshold)))
+
     memory = []
     # 12 Zeilen mit 4 Hexadezimalzahlen pro Zeile
     print('Werte: ', int(bw), float(threshold), str(mode) ) # threshold*10 in 0.1mT
@@ -122,7 +160,29 @@ def generate_memory():
 
     hex_string = mem.hex()
     # Verbinden der Zeilen mit Zeilenumbrüchen
-    st.session_state.text = 'EEPROM bytes:   '+arr+'\n' + my_str + '\nHEX String:    ' + hex_string + '\n' + 'Parity: ' + str(parity)
+    st.session_state.text = 'EEPROM bytes:   '+arr+ 'HEX String:    ' + hex_string + '\n' + 'Parity: ' + str(parity)+'\n'+my_str
+
+    # Channel A and B plots
+    ax1.plot(x, y_sin, label='Channel A', alpha=0.4)
+    ax1.plot(x, y_sin_hyst, label='OUT1', color='red')
+    ax1.axhline(int(1. * float(threshold)), color='green', linestyle='--', label='BON')
+    ax1.axhline(-1.*int(1. * float(threshold)), color='orange', linestyle='--', label='BOFF')
+    ax1.set_ylabel('Channel A')
+#    ax1.set_title('Channel A')
+    ax1.legend()
+    ax1.grid(True)
+    ax2.plot(x, y_cos, label='Channel B', alpha=0.4)
+    ax2.plot(x, y_cos_hyst, label='OUT2', color='blue')
+    ax2.axhline(int(1. * float(threshold)), color='green', linestyle='--', label='BON')
+    ax2.axhline(-1.*int(1. * float(threshold)), color='orange', linestyle='--', label='BOFF')
+    ax2.set_ylabel('Channel B')
+    ax2.set_xlabel('x')
+#    ax2.set_title('Channel B')
+    ax2.legend()
+    ax2.grid(True)
+
+    if 'fig' in st.session_state:
+        st.pyplot(st.session_state['fig'])
 
 # Sidebar
 with st.sidebar:
@@ -164,9 +224,10 @@ txt = '<div class="chat-row">'
 #    div += '<img class="chat-icon" src="./app/static/ai_icon1.png" width=40 height=40>'
 txt += '<div class="chat-bubble ai-bubble">'+'Hello, please make your inputs and generate.\n'+' </div>  </div>'
   
-st.markdown(txt, unsafe_allow_html=True)
+#st.markdown(txt, unsafe_allow_html=True)
 add_vertical_space(1)
-st.text_area('EEPROM contents:', value=st.session_state.text, height=410)
+st.text_area('Hello, please make your inputs and generate.  EEPROM contents:', value=st.session_state.text, height=370)
 
-
+##fig.tight_layout()
+##st.pyplot(fig)
 
