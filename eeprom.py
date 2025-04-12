@@ -52,9 +52,16 @@ if 'text' not in st.session_state:
     st.session_state.text = ""
 
 # Zeitachse & Signale
-x = np.linspace(0, 4 * np.pi, 1000)
-y_sin = 25.*np.sin(x)
-y_cos = 25.*np.cos(x)
+# Kombiniere beide: vorwärts und rückwärts
+#x = np.concatenate((x_forward, x_backward))
+x = np.concatenate([np.linspace(0, 3.5 * np.pi, 600), np.linspace(3.5 * np.pi, 0, 600)])
+x_plot = np.linspace(0, 7 * np.pi, 1200)
+x = x[:950]
+x_plot = x_plot[:950]
+
+# Erzeuge Signale
+y_sin = 25. * np.sin(x)
+y_cos = 25. * np.cos(x)
 
 # Plot
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
@@ -81,11 +88,39 @@ def hysterese(signal, thresh_high, thresh_low):
         output[i] = state
     return output
 
-def generate_memory():
-    # Hysterese anwenden
-    y_sin_hyst = hysterese(y_sin, int(1. * float(threshold)), -1.*int(1. * float(threshold)))
-    y_cos_hyst = hysterese(y_cos, int(1. * float(threshold)), -1.*int(1. * float(threshold)))
+def hys_speed_direction(signal):
+    output = np.zeros_like(signal)
+    state = 0
+    for i, val in enumerate(signal):
+        if i < 600:
+            output[i] = 0
+        elif state == 0 and val > .009:
+            state = 10
+        output[i] = state
+    return output
 
+def hys_speed_dir(signal1, signal2):
+    output = np.zeros_like(signal1)
+    state = 0
+    for i, (val1, val2) in enumerate(zip(signal1, signal2)):
+        if i < 600:
+            output[i] = 0
+        elif state == 0 and val1 > .009 and val2 < 0.009:
+            state = 10
+        elif state == 0 and val2 > .009 and val1 > 0.009 :
+            state = 10
+        output[i] = state
+    return output
+
+def generate_memory():
+    if mode=='speed/speed':
+        y_sin_hyst = hysterese(y_sin, int(1. * float(threshold)), -1.*int(1. * float(threshold)))
+        y_cos_hyst = hysterese(y_cos, int(1. * float(threshold)), -1.*int(1. * float(threshold)))
+    else:
+        y_sin_hyst = hysterese(y_sin, int(1. * float(threshold)), -1.*int(1. * float(threshold)))
+        y_cos_hyst = hysterese(y_cos, int(1. * float(threshold)), -1.*int(1. * float(threshold)))
+        y_cos_hyst = hys_speed_dir(y_sin_hyst, y_cos_hyst)
+        
     memory = []
     # 12 Zeilen mit 4 Hexadezimalzahlen pro Zeile
     print('Werte: ', int(bw), float(threshold), str(mode) ) # threshold*10 in 0.1mT
@@ -163,16 +198,16 @@ def generate_memory():
     st.session_state.text = 'EEPROM bytes:   '+arr+ 'HEX String:    ' + hex_string + '\n' + 'Parity: ' + str(parity)+'\n'+my_str
 
     # Channel A and B plots
-    ax1.plot(x, y_sin, label='Channel A', alpha=0.4)
-    ax1.plot(x, y_sin_hyst, label='OUT1', color='red')
+    ax1.plot(x_plot, y_sin, label='Channel A', alpha=0.4)
+    ax1.plot(x_plot, y_sin_hyst, label='OUT1', color='red')
     ax1.axhline(int(1. * float(threshold)), color='green', linestyle='--', label='BON')
     ax1.axhline(-1.*int(1. * float(threshold)), color='orange', linestyle='--', label='BOFF')
     ax1.set_ylabel('Channel A')
 #    ax1.set_title('Channel A')
     ax1.legend()
     ax1.grid(True)
-    ax2.plot(x, y_cos, label='Channel B', alpha=0.4)
-    ax2.plot(x, y_cos_hyst, label='OUT2', color='blue')
+    ax2.plot(x_plot, y_cos, label='Channel B', alpha=0.4)
+    ax2.plot(x_plot, y_cos_hyst, label='OUT2', color='blue')
     ax2.axhline(int(1. * float(threshold)), color='green', linestyle='--', label='BON')
     ax2.axhline(-1.*int(1. * float(threshold)), color='orange', linestyle='--', label='BOFF')
     ax2.set_ylabel('Channel B')
