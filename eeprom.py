@@ -5,14 +5,8 @@ from helpers import *
 import os, time, random, psutil, datetime, pickle, time
 import numpy as np
 import matplotlib.pyplot as plt
-##import pickle
-import pyvista as pv
-from stpyvista import stpyvista
-##from stpyvista.trame_backend import stpyvista
-
+##import pyvista as pv
 ##from stpyvista import stpyvista
-###from stpyvista.utils import is_the_app_embedded, start_xvfb
-##import pantry.stpyvista_pantry as stpv
 
 # CSS für weniger Abstand nach oben
 ##st.markdown("""
@@ -274,35 +268,35 @@ txt += '<div class="chat-bubble ai-bubble">'+'Hello, please make your inputs and
 add_vertical_space(1)
 st.text_area('Hello, please make your inputs and generate.  EEPROM contents:', value=st.session_state.text, height=370)
 
-plotter = pv.Plotter(window_size=[400,400])
-
-pv.global_theme.color_cycler = 'default'
-
-box = pv.Box(bounds=(-3.0, 3.0, 0, 4.0, -0.5, 0.5), level=4)
-ft1 = pv.Box(bounds=(-3.0, -2.5, -1.0, 0, -0.5, 0.0), level=4)
-ft2 = pv.Box(bounds=(2.5, 3.0, -1.0, 0, -0.5, 0.0), level=4)
-ft3 = pv.Box(bounds=(-0.25, 0.25, 0.0, 5.0, -0.5, 0.0), level=4)
-cyl = pv.Cylinder(center=(0.0, 2.0, 2.8), direction=(0.0, 0.0, 1.0), radius=1.8, height=2.0)
-
-dataset = pv.MultiBlock(
-    [box, cyl]
-)
-#actor, mapper = plotter.add_composite(dataset)
-## Add mesh to the plotter
-plotter.add_mesh(box, color='black')
-plotter.add_mesh(ft1, color='grey')
-plotter.add_mesh(ft2, color='grey')
-plotter.add_mesh(ft3, color='grey')
-plotter.add_mesh(cyl, color='red')
-
-## Final touches
-plotter.view_isometric()
-plotter.background_color = 'white'
-
-#mapper.block_attr[1].color = 'r'
-
-## Send to streamlit
-stpyvista(plotter, key="Sensor")
+##plotter = pv.Plotter(window_size=[400,400])
+##
+##pv.global_theme.color_cycler = 'default'
+##
+##box = pv.Box(bounds=(-3.0, 3.0, 0, 4.0, -0.5, 0.5), level=4)
+##ft1 = pv.Box(bounds=(-3.0, -2.5, -1.0, 0, -0.5, 0.0), level=4)
+##ft2 = pv.Box(bounds=(2.5, 3.0, -1.0, 0, -0.5, 0.0), level=4)
+##ft3 = pv.Box(bounds=(-0.25, 0.25, 0.0, 5.0, -0.5, 0.0), level=4)
+##cyl = pv.Cylinder(center=(0.0, 2.0, 2.8), direction=(0.0, 0.0, 1.0), radius=1.8, height=2.0)
+##
+##dataset = pv.MultiBlock(
+##    [box, cyl]
+##)
+###actor, mapper = plotter.add_composite(dataset)
+#### Add mesh to the plotter
+##plotter.add_mesh(box, color='black')
+##plotter.add_mesh(ft1, color='grey')
+##plotter.add_mesh(ft2, color='grey')
+##plotter.add_mesh(ft3, color='grey')
+##plotter.add_mesh(cyl, color='red')
+##
+#### Final touches
+##plotter.view_isometric()
+##plotter.background_color = 'white'
+##
+###mapper.block_attr[1].color = 'r'
+##
+#### Send to streamlit
+##stpyvista(plotter, key="Sensor")
 
 ##fig.tight_layout()
 ##st.pyplot(fig)
