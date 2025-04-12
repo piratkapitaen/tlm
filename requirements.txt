@@ -3,9 +3,3 @@ streamlit_extras
 matplotlib==3.9.0
 numpy==1.26.4
 psutil==6.1.0
-pyvista[jupyter]
-trame-jupyter-extension
-stpyvista==0.0.9
-trame-vtk
-trame-vuetify
-ipywidgets
